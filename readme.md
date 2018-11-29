@@ -11,23 +11,15 @@
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
 Laravel is accessible, yet powerful, providing tools needed for large, robust applications.
 
-
 ## License
-
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
 ## commit 1
 we make controllers by writing php artisan make:controller PhotosController and model by writing php artisan make:model Album -m
 then to migrate the changes simply php artisan migrate
+
 ## commit 2
  in AlbumsController.php we write this code
  ```public function index(){
@@ -177,4 +169,69 @@ Route::post('/albums/store','AlbumsController@store' );
 ```
 and now the form work is done
 
-  
+##commit 3
+we will create now navbar and have our error messages include
+TO setup topbar in components create a folder as ins and make two files as messages and topbar 
+in messages:
+`
+@if(count($errors) > 0)
+  @foreach($errors->all() as $error)
+    <div class="callout alert">
+      {{$error}}
+    </div>
+  @endforeach
+@endif
+
+@if(session('success'))
+  <div class="callout success">
+    {{session('success')}}
+  </div>
+@endif
+
+@if(session('error'))
+  <div class="callout alert">
+    {{session('error')}}
+  </div>
+@endif
+`
+in topbar:
+`
+<div class="top-bar">
+	<div class="row">
+		<div class="top-bar-left">
+			<ul class="menu">
+				<li class="menu-text">PhotoShow</li>
+				<li><a href="/">Home</a></li>
+				 <li><a href="/albums/create">Create Album</a></li>
+			</ul>	
+		</div>
+	</div>
+</div>			
+`
+now comes the validation and cover image part 
+in AlbumsController.php add this function
+`
+ public function store(Request $request){
+        $this->validate($request, [
+          'name' => 'required',
+          'cover_image' => 'image|max:1999'
+        ]);
+
+        //GET FILENAME WITH EXTENSION
+		$filenameWithExt = $request->file('cover_image')->getClientOriginalName();
+
+        //	 JUST GET FILE NAME 
+        $filename1 = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+
+        // get extension
+        $extension =  $request->file('cover_image')->getClientOriginalExtension();
+         
+        //get new filenname
+        $filenameToStore = $filename1.'_'.time().'.'.$extension;
+
+        //upload image
+        $path = $request->file('cover_image')->storeAs('public/album_covers', $filenameToStore);
+
+        return $path;
+    } 
+`
