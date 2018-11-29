@@ -22,7 +22,8 @@ then to migrate the changes simply php artisan migrate
 
 ## commit 2
  in AlbumsController.php we write this code
- ```public function index(){
+ ```
+ public function index(){
     	return view('albums.index');
     }
     public function create(){
