@@ -169,11 +169,12 @@ Route::post('/albums/store','AlbumsController@store' );
 ```
 and now the form work is done
 
-##commit 3
+## commit 3
+
 we will create now navbar and have our error messages include
 TO setup topbar in components create a folder as ins and make two files as messages and topbar 
 in messages:
-`
+```
 @if(count($errors) > 0)
   @foreach($errors->all() as $error)
     <div class="callout alert">
@@ -193,9 +194,9 @@ in messages:
     {{session('error')}}
   </div>
 @endif
-`
+```
 in topbar:
-`
+```
 <div class="top-bar">
 	<div class="row">
 		<div class="top-bar-left">
@@ -207,10 +208,10 @@ in topbar:
 		</div>
 	</div>
 </div>			
-`
+```
 now comes the validation and cover image part 
 in AlbumsController.php add this function
-`
+```
  public function store(Request $request){
         $this->validate($request, [
           'name' => 'required',
@@ -234,4 +235,88 @@ in AlbumsController.php add this function
 
         return $path;
     } 
-`
+```
+## commit 4
+in Album.php apply hasmany relationship :
+```
+class Album extends Model
+{
+    protected $fillable = array('name', 'description', 'cover_image');
+
+    public function photos(){
+    	//this hasmany means that one album can have many photos
+    	return $this->hasMany('App\Photo');
+    }
+}
+```
+ and in Photo.php apply belongsto relationship
+ ```
+ class Photo extends Model
+{
+    //we need belongs to relation
+    protected $fillable = array('album_id','description', 'photo', 'title', 'size');
+
+    public function album(){
+    	return $this->belongsTo('App\Album');
+    }
+}
+``` 
+now create album in AlbumsController.php in the same function
+```
+ //create album
+        $album = new Album;
+        $album->name = $request->input('name');
+        $album->description = $request->input('description');
+        $album->cover_image = $filenameToStore;
+        $album->save();
+        return redirect('/albums')->with('success','Album created');
+```
+now in AlbumsController.php we need to pass the albums value to index.blade.php to show the photo for that we have to implement this code
+```
+public function index(){
+    	$albums = Album::with('Photos')->get();
+    	return view('albums.index')->with('albums', $albums);
+    }
+```
+and now display the phots in index.blade.php as this:
+```
+@extends('layouts.app')
+
+@section('content')
+    @if(count($albums) > 0)
+    <?php
+      $colcount = count($albums);
+  	  $i = 1;
+    ?>
+    <div id="albums">
+      <div class="row text-center">
+        @foreach($albums as $album)
+          @if($i == $colcount)
+             <div class='medium-4 columns end'>
+               <a href="/albums/{{$album->id}}">
+                  <img class="thumbnail" src="storage/album_covers/{{$album->cover_image}}" alt="{{$album->name}}">
+                </a>
+               <br>
+               <h4>{{$album->name}}</h4>
+          @else
+            <div class='medium-4 columns'>
+              <a href="/albums/{{$album->id}}">
+                <img class="thumbnail" src="storage/album_covers/{{$album->cover_image}}" alt="{{$album->name}}">
+              </a>
+              <br>
+              <h4>{{$album->name}}</h4>
+          @endif
+        	@if($i % 3 == 0)
+          </div></div><div class="row text-center">
+        	@else
+            </div>
+          @endif
+        	<?php $i++; ?>
+        @endforeach
+      </div>
+    </div>
+  @else
+    <p>No Albums To Display</p>
+  @endif 
+  ```
+  and this is not something difficult or tedious to implement
