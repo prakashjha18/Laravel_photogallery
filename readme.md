@@ -170,10 +170,11 @@ Route::post('/albums/store','AlbumsController@store' );
 and now the form work is done
 
 ##commit 3
+
 we will create now navbar and have our error messages include
 TO setup topbar in components create a folder as ins and make two files as messages and topbar 
 in messages:
-`
+```
 @if(count($errors) > 0)
   @foreach($errors->all() as $error)
     <div class="callout alert">
@@ -193,9 +194,9 @@ in messages:
     {{session('error')}}
   </div>
 @endif
-`
+```
 in topbar:
-`
+```
 <div class="top-bar">
 	<div class="row">
 		<div class="top-bar-left">
@@ -207,10 +208,10 @@ in topbar:
 		</div>
 	</div>
 </div>			
-`
+```
 now comes the validation and cover image part 
 in AlbumsController.php add this function
-`
+```
  public function store(Request $request){
         $this->validate($request, [
           'name' => 'required',
@@ -234,4 +235,4 @@ in AlbumsController.php add this function
 
         return $path;
     } 
-`
+```
