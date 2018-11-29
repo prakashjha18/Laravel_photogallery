@@ -133,6 +133,12 @@ in text file :
 	{{Form::text($name, $value, $attributes)}}
 </label>	
 ```
+in file file
+```
+<div>
+	{{Form::file($name)}}
+</div>	
+```
 in textarea file :
 ```
 <label>
