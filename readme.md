@@ -169,7 +169,7 @@ Route::post('/albums/store','AlbumsController@store' );
 ```
 and now the form work is done
 
-##commit 3
+## commit 3
 
 we will create now navbar and have our error messages include
 TO setup topbar in components create a folder as ins and make two files as messages and topbar 
