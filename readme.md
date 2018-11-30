@@ -462,6 +462,54 @@ public function store(Request $request){
 @endsection   
 ```
 and now we can list the photos
+
+## photo page and delete
+now we nee to include 2 routing that is one to show the photo and other to delete the photo 
+so now in web.php include these two routing 
+```
+Route::get('/photos/{id}','PhotosController@show' );
+Route::delete('/photos/{id}','PhotosController@destroy' );
+```
+now in photos folder implement this code in show.blade.php 
+```
+@extends('layouts.app')
+
+@section('content')
+   <h3>{{$photo->title}}</h3>
+   <p>{{$photo->description}}</p>
+   <a href="/albums/{{$photo->album_id}}">Back to gallery</a>
+   <hr>
+   <img src="/storage/photos/{{$photo->album_id}}/{{$photo->photo}}" alt="{{$photo->title}}">
+   <br><br>
+   {!!Form::open(['action' => ['PhotosController@destroy', $photo->id], 'method' => 'POST'])!!}
+       {{Form::hidden('_method', 'DELETE')}}
+       {{Form::submit('Delete Photo', ['class' => 'button alert'])}}
+   {!!Form::close()!!}
+   <hr>
+   <small>Size: {{$photo->size}}</small>
+@endsection   
+```
+and now in PhotosController.php implement show nad destroy function
+```
+ public function show($id){
+        $photo = Photo::find($id);
+        return view('photos.show')->with('photo',$photo);
+    }
+
+    public function destroy($id){
+        $photo = Photo::find($id);
+
+        if(Storage::delete('public/photos/'.$photo->album_id.'/'.$photo->photo)){
+        	$photo->delete();
+        	return redirect('/')->with('success','Photo Deleted');
+        }
+    }
+ ``` 
+ and don't forget to include this
+ ```
+ use Illuminate\Support\Facades\Storage;
+```
+    
     
     
   
