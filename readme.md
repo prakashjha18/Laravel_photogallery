@@ -412,7 +412,56 @@ public function store(Request $request){
         return redirect('/albums/'.$request->input('album_id'))->with('success','Photo uploaded created');
     }
  ```   
- and now the phot is uploaded to the database
+ and now the photo is uploaded to the database
+ 
+ ## album photo listing
+ implement this in show.blade.php 
+ ```
+ @extends('layouts.app')
+
+@section('content')
+   <h1>{{$album->name}}</h1>
+   <a class="button secondary" href="/">Go back</a>
+   <a class="button" href="/photos/create/{{$album->id}}">upload Photo to Album</a>
+   <hr>
+   @if(count($album->photos) > 0)
+    <?php
+      $colcount = count($album->photos);
+  	  $i = 1;
+    ?>
+    <div id="photos">
+      <div class="row text-center">
+        @foreach($album->photos as $photo)
+          @if($i == $colcount)
+             <div class='medium-4 columns end'>
+               <a href="/photo/{{$photo->id}}">
+                  <img class="thumbnail" src="/storage/photos/{{$photo->album_id}}//{{$photo->photo}}" alt="{{$photo->title}}">
+                </a>
+               <br>
+               <h4>{{$photo->title}}</h4>
+          @else
+            <div class='medium-4 columns'>
+               <a href="/photo/{{$photo->id}}">
+                  <img class="thumbnail" src="/storage/photos/{{$photo->album_id}}//{{$photo->photo}}" alt="{{$photo->title}}">
+                </a>
+               <br>
+               <h4>{{$photo->title}}</h4>
+          @endif
+        	@if($i % 3 == 0)
+          </div></div><div class="row text-center">
+        	@else
+            </div>
+          @endif
+        	<?php $i++; ?>
+        @endforeach
+      </div>
+    </div>
+  @else
+    <p>No photos To Display</p>
+  @endif 
+@endsection   
+```
+and now we can list the photos
     
     
   
