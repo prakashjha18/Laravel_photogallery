@@ -16,11 +16,11 @@ Laravel is accessible, yet powerful, providing tools needed for large, robust ap
 ## License
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
-## commit 1
+## controllers and models
 we make controllers by writing php artisan make:controller PhotosController and model by writing php artisan make:model Album -m
 then to migrate the changes simply php artisan migrate
 
-## commit 2
+## Form components and views
  in AlbumsController.php we write this code
  ```
  public function index(){
@@ -170,7 +170,7 @@ Route::post('/albums/store','AlbumsController@store' );
 ```
 and now the form work is done
 
-## commit 3
+## cover image upload
 
 we will create now navbar and have our error messages include
 TO setup topbar in components create a folder as ins and make two files as messages and topbar 
@@ -237,7 +237,7 @@ in AlbumsController.php add this function
         return $path;
     } 
 ```
-## commit 4
+## create and display albums
 in Album.php apply hasmany relationship :
 ```
 class Album extends Model
@@ -321,3 +321,100 @@ and now display the phots in index.blade.php as this:
   @endif 
   ```
   and this is not something difficult or tedious to implement
+  
+  ## photo uploads
+  
+creating single page for diffrent albums
+this will be a simple work. firstly we have already given the href in index.blade.php for now there are three things to do which when click on the albums will bring us to their specific page 
+in albums folder create show.blade.php and include this code
+```
+@extends('layouts.app')
+
+@section('content')
+   <h1>{{$album->name}}</h1>
+   <a class="button secondary" href="/">Go back</a>
+   <a class="button" href="/photos/create/{{$album->id}}">upload Photo to Album</a>
+   <hr>
+@endsection   
+```
+give the routing in web.php as
+```
+Route::get('/albums/{id}','AlbumsController@show' );
+```
+and now last in albums controller implement this function
+```
+public function show($id){
+        $album = Album::with('Photos')->find($id);
+        return view('albums.show')->with('album',$album);
+    }  
+```    
+now we want to want to do such as we can be able to upload the photos in the album to this first implement this in web.php
+```
+Route::get('/photos/create/{id}','PhotosController@create' );
+```
+implement this function in PhotosController.php
+```
+public function create($album_id){
+        return view('photos.create')->with('album_id', $album_id);
+    }
+```
+in view create a folder as photos and file as create.blade.php
+and add this code
+```
+@extends('layouts.app')
+
+@section('content')
+    <h3>upload photo</h3>
+    {!!Form::open(['action' => 'PhotosController@store','method' => 'POST', 'enctype' => 'multipart/form-data'])!!}
+    {{Form::text('title','',['placeholder' => 'Photo title'])}}
+    {{Form::textarea('description','',['placeholder' => 'Photo Description'])}}
+    {{Form::hidden('album_id', $album_id)}}
+    {{Form::file('photo')}}
+    {{Form::submit('submit')}}
+  {!! Form::close() !!}
+@endsection    
+```
+and add this routing in web.php as post method
+```
+Route::post('/photos/store','PhotosController@store' );
+```
+implement this function in PhotosController.php to upload image on the database
+```
+public function store(Request $request){
+    	 $this->validate($request, [
+          'title' => 'required',
+          'photo' => 'image|max:1999'
+        ]);
+
+        //GET FILENAME WITH EXTENSION
+		$filenameWithExt = $request->file('photo')->getClientOriginalName();
+
+        //	 JUST GET FILE NAME 
+        $filename1 = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+
+        // get extension
+        $extension =  $request->file('photo')->getClientOriginalExtension();
+         
+        //get new filenname
+        $filenameToStore = $filename1.'_'.time().'.'.$extension;
+
+        //upload image
+        $path = $request->file('photo')->storeAs('public/photos/'.$request->input('album_id'), $filenameToStore);
+
+        //upload photo
+        $photo = new Photo;
+        $photo->album_id = $request->input('album_id');
+        $photo->title = $request->input('title');
+        $photo->description = $request->input('description');
+        $photo->size = $request->file('photo')->getClientSize();
+        $photo->photo = $filenameToStore;
+        $photo->save();
+        return redirect('/albums/'.$request->input('album_id'))->with('success','Photo uploaded created');
+    }
+ ```   
+ and now the phot is uploaded to the database
+    
+    
+  
+  
+  
